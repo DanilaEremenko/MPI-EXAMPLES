@@ -3,7 +3,6 @@
 #include <string>
 #include <cstdlib>
 #include <map>
-#include <chrono>
 #include <list>
 
 std::map<std::string, int> my_count_words(
@@ -46,8 +45,8 @@ std::map<std::string, int> my_count_words(
                     }
 
                     word_map[it.first] += curr_value;
-                    if (curr_value > 0)
-                        std::cout << line_i << " : " << it.first << "(" << curr_value << ")\n";
+//                    if (curr_value > 0)
+//                        std::cout << line_i << " : " << it.first << "(" << curr_value << ")\n";
                 }
             }
         }

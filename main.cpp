@@ -1,5 +1,6 @@
 #include <string>
 #include <map>
+#include <chrono>
 #include "methods/my_text_processor.cpp"
 
 int main(int argc, char **argv) {
@@ -25,7 +26,6 @@ int main(int argc, char **argv) {
                 input_name,
                 word_list
         );
-        std::cout << "-------- RESULTS -----------------\n";
         for (std::pair<std::string, int> it :res_map) {
             std::cout << "\'" << it.first << "\'" << " : " << it.second << '\n';
         }
