@@ -3,4 +3,4 @@ project(MPI_EXAMPLES)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(MPI_EXAMPLES main.cpp)
+add_executable(MPI_EXAMPLES main_sequential.cpp)

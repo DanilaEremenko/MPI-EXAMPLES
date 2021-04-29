@@ -1,0 +1,43 @@
+{
+  "input_list": [
+    {
+      "name": "input_files/1_file rus.txt",
+      "word_list": [
+        "капитал",
+        "день",
+        "she"
+      ],
+      "test_list": [
+        0,
+        0,
+        3
+      ]
+    },
+    {
+      "name": "input_files/2_1984.txt",
+      "word_list": [
+        "капитал",
+        "день",
+        "she"
+      ],
+      "test_list": [
+        0,
+        60,
+        20
+      ]
+    },
+    {
+      "name": "input_files/2_The Haunted Man and the Ghost's Bargain.txt",
+      "word_list": [
+        "капитал",
+        "день",
+        "she"
+      ],
+      "test_list": [
+        172,
+        0,
+        0
+      ]
+    }
+  ]
+}
