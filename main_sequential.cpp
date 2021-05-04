@@ -10,7 +10,7 @@ void verbose_print(const std::string &msg, bool verbose) {
         std::cout << msg;
 }
 
-void test_realization(
+void test_func(
         const std::string &name,
         json config_json,
         std::list<int> (*tested_func)(const std::string &input_name, const std::list<std::string> &word_list),
@@ -46,14 +46,15 @@ void test_realization(
     }
 
     auto end_time = std::chrono::high_resolution_clock::now();
-    verbose_print("------------ TIME -------------\n", verbose);
-    verbose_print("time : " + std::to_string((end_time - begin_time).count() * 1e-9) + '\n', verbose);
+    std::cout << "-------------- TIME -------------\n";
+    std::cout << "time : " + std::to_string((end_time - begin_time).count() * 1e-9) + '\n';
 }
 
 
 int main() {
     json config_json = json::parse(read_file("config.json"));
 
-    bool verbose = true;
-    test_realization("SEQUENTIAL", config_json, &my_count_words_sequential, verbose);
+    bool verbose = false;
+    test_func("SEQUENTIAL", config_json, &my_count_words_sequential, verbose);
+    test_func("POSIX", config_json, &my_count_words_parallel_posix, verbose);
 }
