@@ -2,14 +2,37 @@
 #include <chrono>
 #include "methods/my_text_processor.cpp"
 #include <json.hpp>
+#include <fstream>
 
 using json = nlohmann::json;
+
+/***********************************************************************************************************************
+------------------------------------------------------- YEAH -----------------------------------------------------------
+***********************************************************************************************************************/
+std::string read_file(const std::string &input_name) {
+    std::ifstream in_stream(input_name.c_str());
+
+    if (!in_stream) {
+        std::cerr << "error opening stream";
+        exit(0);
+    }
+
+    std::string curr_line;
+    std::string res_string;
+    while (std::getline(in_stream, curr_line)) {
+        res_string += curr_line;
+    }
+    return res_string;
+}
 
 void verbose_print(const std::string &msg, bool verbose) {
     if (verbose)
         std::cout << msg;
 }
 
+/***********************************************************************************************************************
+------------------------------------------------------- FUNC FOR TESTING -----------------------------------------------
+***********************************************************************************************************************/
 json test_func(
         const std::string &name,
         json config_json,
@@ -21,15 +44,16 @@ json test_func(
     int i = 0;
     for (json curr_json:config_json["input_list"]) {
         std::string input_name = curr_json["name"];
-        std::list<std::string> word_list = curr_json["word_list"];
-        std::list<int> count_test_list = curr_json["test_list"];
 
         verbose_print("-------- FILE = " + input_name + "-----------------\n", verbose);
+        std::string full_text = read_file(input_name);
+        std::list<std::string> word_list = curr_json["word_list"];
+        std::list<int> count_test_list = curr_json["test_list"];
 
         // ------------------------ function call -----------------------------
         auto begin_time = std::chrono::high_resolution_clock::now();
         std::list<int> count_list = tested_func(
-                input_name,
+                full_text,
                 word_list
         );
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -56,7 +80,9 @@ json test_func(
     return res_json;
 }
 
-
+/***********************************************************************************************************************
+------------------------------------------------------- MAIN -----------------------------------------------------------
+***********************************************************************************************************************/
 int main() {
     json config_json = json::parse(read_file("config.json"));
 

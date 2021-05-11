@@ -1,8 +1,6 @@
 #include <cmath>
-#include <fstream>
 #include <iostream>
 #include <string>
-#include <cstdlib>
 #include <list>
 #include <thread>
 #include <future>
@@ -11,23 +9,6 @@
 /***********************************************************************************************************************
 ------------------------------------------------------- COMMON PART ----------------------------------------------------
 ***********************************************************************************************************************/
-std::string read_file(const std::string &input_name) {
-    std::ifstream in_stream(input_name.c_str());
-
-    if (!in_stream) {
-        std::cerr << "error opening stream";
-        exit(0);
-    }
-
-    std::string curr_line;
-    std::string res_string;
-    while (std::getline(in_stream, curr_line)) {
-        res_string += curr_line;
-    }
-    return res_string;
-}
-
-
 int count_pattern_from_to(const std::string &full_text, const std::string &curr_pattern, int from, int to) {
     int curr_value = 0;
     assert(from >= 0);
@@ -49,12 +30,10 @@ int count_pattern_from_to(const std::string &full_text, const std::string &curr_
 ------------------------------------------------------- SEQUENTIAL REALIZATION -----------------------------------------
 ***********************************************************************************************************************/
 std::list<int> my_count_words_sequential(
-        const std::string &input_name,
+        const std::string &full_text,
         const std::list<std::string> &word_list
 ) {
     std::list<int> count_list;
-    std::string full_text = read_file(input_name);
-
     for (const std::string &curr_pattern :word_list) {
         int curr_value = count_pattern_from_to(
                 full_text,
@@ -92,12 +71,10 @@ void count_pattern_from_to_wrapper(
 
 
 std::list<int> my_count_words_parallel_posix(
-        const std::string &input_name,
+        const std::string &full_text,
         const std::list<std::string> &word_list
 ) {
     std::list<int> count_list;
-
-    std::string full_text = read_file(input_name);
     const auto processor_count = std::thread::hardware_concurrency();
 
     for (const std::string &curr_pattern :word_list) {
