@@ -30,19 +30,18 @@ std::string read_file(const std::string &input_name) {
 
 int count_pattern_from_to(const std::string &full_text, const std::string &curr_pattern, int from, int to) {
     int curr_value = 0;
-    assert((to - from) >= curr_pattern.length());
     assert(from >= 0);
     assert(from < full_text.length());
     assert(to > 0);
     assert(to <= full_text.length());
     assert(curr_pattern.length() > 0);
-    assert(curr_pattern.length() < full_text.length());
-    for (int start_i = from; start_i < to - curr_pattern.length(); ++start_i) {
-        std::string curr_sub_string = full_text.substr(start_i, curr_pattern.length());
-        if (curr_sub_string == curr_pattern) {
-            curr_value++;
+    if (curr_pattern.length() < full_text.length())
+        for (int start_i = from; start_i < to - curr_pattern.length() + 1; ++start_i) {
+            std::string curr_sub_string = full_text.substr(start_i, curr_pattern.length());
+            if (curr_sub_string == curr_pattern) {
+                curr_value++;
+            }
         }
-    }
     return curr_value;
 }
 
@@ -63,7 +62,7 @@ std::list<int> my_count_words_sequential(
                 0,
                 full_text.length()
         );
-        count_list.push_front(curr_value);
+        count_list.push_back(curr_value);
     }
     return count_list;
 }
@@ -128,7 +127,7 @@ std::list<int> my_count_words_parallel_posix(
         }
         for (std::thread &curr_thread:thread_list) curr_thread.join();
 
-        count_list.push_front(curr_value);
+        count_list.push_back(curr_value);
 
     }
 
