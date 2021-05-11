@@ -6,5 +6,14 @@ set(CMAKE_CXX_STANDARD 14)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+find_package(MPI REQUIRED)
+if (MPI_FOUND)
+    include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+else (MPI_FOUND)
+    message(SEND_ERROR "This application cannot compile without MPI")
+endif (MPI_FOUND)
+
+#include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+
 add_executable(MPI_EXAMPLES main_comparison.cpp)
-target_link_libraries (MPI_EXAMPLES ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(MPI_EXAMPLES ${CMAKE_THREAD_LIBS_INIT} ${MPI_LIBRARIES})
