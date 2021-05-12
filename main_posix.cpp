@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 
     bool verbose = false;
     json posix_json = test_func("POSIX", config_json, &my_count_words_parallel_posix, verbose, thread_num);
-    std::ofstream res_file("res/posix_res.json");
+    std::ofstream res_file("res/res_posix.json");
     res_file << posix_json;
 //    json seq_json = test_func("SEQUENTIAL", config_json, &my_count_words_sequential, verbose);
 //    assert(seq_json.size() == posix_json.size());

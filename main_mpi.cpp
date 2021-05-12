@@ -58,9 +58,9 @@ int main() {
             }
             received_num++;
         }
-        std::ofstream res_file("res/mpi_res.json");
+        std::ofstream res_file("res/res_mpi.json");
         auto end_time = std::chrono::high_resolution_clock::now();
-        res_json["time"] = (end_time - begin_time).count() * 1e-9;
+        res_json["input_list"][0]["time"] = (end_time - begin_time).count() * 1e-9;
         res_file << res_json;
 
 
