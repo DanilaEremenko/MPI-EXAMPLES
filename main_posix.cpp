@@ -4,11 +4,17 @@
 /***********************************************************************************************************************
 ------------------------------------------------------- MAIN -----------------------------------------------------------
 ***********************************************************************************************************************/
-int main() {
+int main(int argc, char **argv) {
+    if (argc != 2) {
+        printf("Thread num must be passed\n");
+        exit(1);
+    }
+    int thread_num = atoi(argv[1]);
+
     json config_json = json::parse(read_file("config.json"));
 
     bool verbose = false;
-    json posix_json = test_func("POSIX", config_json, &my_count_words_parallel_posix, verbose);
+    json posix_json = test_func("POSIX", config_json, &my_count_words_parallel_posix, verbose, thread_num);
     std::ofstream res_file("res/posix_res.json");
     res_file << posix_json;
 //    json seq_json = test_func("SEQUENTIAL", config_json, &my_count_words_sequential, verbose);

@@ -7,7 +7,7 @@ int main() {
     json config_json = json::parse(read_file("config.json"));
 
     bool verbose = false;
-    json seq_json = test_func("SEQUENTIAL", config_json, &my_count_words_sequential, verbose);
+    json seq_json = test_func("SEQUENTIAL", config_json, &my_count_words_sequential, verbose, 0);
     std::ofstream res_file("res/seq_res.json");
     res_file << seq_json;
 //    json posix_json = test_func("POSIX", config_json, &my_count_words_parallel_posix, verbose);

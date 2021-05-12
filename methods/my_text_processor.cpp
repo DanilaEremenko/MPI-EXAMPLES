@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <vector>
 #include <thread>
 #include <future>
 #include <cassert>
@@ -10,15 +11,17 @@
 /***********************************************************************************************************************
 ------------------------------------------------------- COMMON PART ----------------------------------------------------
 ***********************************************************************************************************************/
-int count_pattern_from_to(const std::string &full_text, const std::string &curr_pattern, int from, int to) {
+int
+count_pattern_from_to(const std::string &full_text, const std::string &curr_pattern, int from, int to) {
     int curr_value = 0;
     assert(from >= 0);
     assert(from < full_text.length());
     assert(to > 0);
     assert(to <= full_text.length());
     assert(curr_pattern.length() > 0);
-    if (curr_pattern.length() < full_text.length())
-        for (int start_i = from; start_i < to - curr_pattern.length() + 1; ++start_i) {
+    if (curr_pattern.length() <= full_text.length())
+        for (int start_i = from; start_i + curr_pattern.length() <= to; ++start_i) {
+            assert(start_i + curr_pattern.length() <= full_text.length());
             std::string curr_sub_string = full_text.substr(start_i, curr_pattern.length());
             if (curr_sub_string == curr_pattern) {
                 curr_value++;
@@ -32,7 +35,8 @@ int count_pattern_from_to(const std::string &full_text, const std::string &curr_
 ***********************************************************************************************************************/
 std::list<int> my_count_words_sequential(
         const std::string &full_text,
-        const std::list<std::string> &word_list
+        const std::list<std::string> &word_list,
+        int thread_num
 ) {
     std::list<int> count_list;
     for (const std::string &curr_pattern :word_list) {
@@ -70,24 +74,52 @@ void count_pattern_from_to_wrapper(
     }
 }
 
+//TODO maybe no please
+std::vector<int> get_smart_batch_bounds(
+        int curr_batch_from,
+        int curr_batch_to,
+        int batch_size,
+        const std::string &curr_pattern,
+        const std::string &full_text
+) {
+    /********************************
+    ******* batch conflicts solver **
+    ********************************/
+    int curr_batch_from_smart = fmax(0, (long) ((long) curr_batch_from - (long) (curr_pattern.length())));
+    int next_batch_from = curr_batch_from + batch_size;
+    int curr_batch_to_smart;
+    if (next_batch_from < full_text.length()) {
+        int next_batch_from_smart = fmax(0, (long) ((long) next_batch_from - (long) (curr_pattern.length())));
+        curr_batch_to_smart =
+                count_pattern_from_to(full_text, curr_pattern, next_batch_from_smart, curr_batch_to)
+                ?
+                next_batch_from_smart : curr_batch_to;
+        curr_batch_to_smart = fmax(curr_batch_to_smart, curr_pattern.length());
+
+    } else {
+        curr_batch_to_smart = curr_batch_to;
+    }
+
+    std::vector<int> res;
+    return res;
+}
 
 std::list<int> my_count_words_parallel_posix(
         const std::string &full_text,
-        const std::list<std::string> &word_list
+        const std::list<std::string> &word_list,
+        int thread_num
 ) {
     std::list<int> count_list;
-    const auto processor_count = std::thread::hardware_concurrency();
-
     for (const std::string &curr_pattern :word_list) {
         int curr_value = 0;
         std::mutex mutex;
         std::list<std::thread> thread_list;
-        int batch_size = fmax(
-                std::ceil((float) full_text.size() / (float) processor_count),
-                100
-        );
+        int batch_size = fmax(std::ceil((float) full_text.size() / (float) thread_num), curr_pattern.length());
 
         for (int curr_batch_from = 0; curr_batch_from < full_text.size(); curr_batch_from += batch_size) {
+            int curr_batch_from_smart = curr_batch_from;
+            int curr_batch_to_smart = fmin(curr_batch_from + batch_size + curr_pattern.length(), full_text.length());
+
             thread_list.push_front(
                     std::thread(
                             //func
@@ -97,8 +129,8 @@ std::list<int> my_count_words_parallel_posix(
                             &mutex,
                             full_text,
                             curr_pattern,
-                            curr_batch_from,
-                            fmin(curr_batch_from + batch_size, full_text.length())
+                            curr_batch_from_smart,
+                            curr_batch_to_smart
                     )
             );
 
@@ -140,7 +172,6 @@ void verbose_print(const std::string &msg, bool verbose) {
 ------------------------------------------------------- FUNC FOR TESTING -----------------------------------------------
 ***********************************************************************************************************************/
 #include <json.hpp>
-#include <fstream>
 
 using json = nlohmann::json;
 
@@ -148,8 +179,11 @@ using json = nlohmann::json;
 json test_func(
         const std::string &name,
         json config_json,
-        std::list<int> (*tested_func)(const std::string &input_name, const std::list<std::string> &word_list),
-        bool verbose
+        std::list<int> (*tested_func)(const std::string &input_name,
+                                      const std::list<std::string> &word_list,
+                                      int thread_num),
+        bool verbose,
+        int thread_num
 ) {
     std::cout << "---------------TEST " + name + " --------------------------------------------\n";
     json res_json = config_json;
@@ -166,7 +200,8 @@ json test_func(
         auto begin_time = std::chrono::high_resolution_clock::now();
         std::list<int> count_list = tested_func(
                 full_text,
-                word_list
+                word_list,
+                thread_num
         );
         auto end_time = std::chrono::high_resolution_clock::now();
         res_json["input_list"][i]["time"] = (end_time - begin_time).count() * 1e-9;

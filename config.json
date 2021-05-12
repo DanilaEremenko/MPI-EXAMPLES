@@ -1,58 +1,6 @@
 {
   "input_list": [
     {
-      "name": "input_files/1_file eng.txt",
-      "word_list": [
-        "капитал",
-        "день",
-        "she"
-      ],
-      "test_list": [
-        0,
-        0,
-        3
-      ]
-    },
-    {
-      "name": "input_files/1_file rus.txt",
-      "word_list": [
-        "капитал",
-        "день",
-        "she"
-      ],
-      "test_list": [
-        4,
-        0,
-        0
-      ]
-    },
-    {
-      "name": "input_files/2_1984.txt",
-      "word_list": [
-        "капитал",
-        "день",
-        "she"
-      ],
-      "test_list": [
-        20,
-        60,
-        0
-      ]
-    },
-    {
-      "name": "input_files/2_The Haunted Man and the Ghost's Bargain.txt",
-      "word_list": [
-        "капитал",
-        "день",
-        "she"
-      ],
-      "test_list": [
-        0,
-        0,
-        172
-      ]
-    },
-    {
       "name": "input_files/3_1984_x5.txt",
       "word_list": [
         "капитал",
@@ -63,19 +11,6 @@
         100,
         300,
         0
-      ]
-    },
-    {
-      "name": "input_files/3_The Haunted Man and the Ghost's Bargain_x10.txt",
-      "word_list": [
-        "капитал",
-        "день",
-        "she"
-      ],
-      "test_list": [
-        0,
-        0,
-        1720
       ]
     }
   ]
