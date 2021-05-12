@@ -15,7 +15,7 @@ int main() {
         if (curr_json["word_list"].size() > max_message_size)
             max_message_size = curr_json["word_list"].size();
     }
-    printf("Max message size = %d\n", max_message_size);
+//    printf("Max message size = %d\n", max_message_size);
 
     std::list<int> full_result;
     int rank, worker_size;
@@ -37,18 +37,18 @@ int main() {
         int max_message_n = (int) ((worker_size - 1) * res_json["input_list"].size());
         while (received_num < max_message_n) {
             int curr_msg[max_message_size];
-            printf("Root awaiting message(received_num = %d/%d)\n", received_num, max_message_n);
+//            printf("Root awaiting message(received_num = %d/%d)\n", received_num, max_message_n);
             MPI_Recv(&curr_msg, max_message_size + 5, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, nullptr);
-            printf("Root receive message\n");
-            printf("\tvalues size = %d\n", curr_msg[0]);
-            printf("\tindex of json %d\n", curr_msg[1]);
+//            printf("Root receive message\n");
+//            printf("\tvalues size = %d\n", curr_msg[0]);
+//            printf("\tindex of json %d\n", curr_msg[1]);
 
             int count_list_size = curr_msg[0];
             int json_i = curr_msg[1];
 
-            for (int j = 2; j < 2 + count_list_size; ++j) {
-                printf("\tcount = %d\n", curr_msg[j]);
-            }
+//            for (int j = 2; j < 2 + count_list_size; ++j) {
+//                printf("\tcount = %d\n", curr_msg[j]);
+//            }
 
 
             for (int i = 2; i < 2 + count_list_size; ++i) {
@@ -93,19 +93,19 @@ int main() {
                         curr_to
                 );
 
-                printf("Rank = %d, value = %d\n", rank, curr_value);
+//                printf("Rank = %d, value = %d\n", rank, curr_value);
 
                 curr_msg[i] = curr_value;
                 i++;
 
 
             }
-            printf("Rank = %d sending message\n", rank);
-            printf("\tvalues size = %d\n", curr_msg[0]);
-            printf("\tindex of json %d\n", curr_msg[1]);
-            for (int j = 2; j < msg_size; ++j) {
-                printf("\tcount = %d\n", curr_msg[j]);
-            }
+//            printf("Rank = %d sending message\n", rank);
+//            printf("\tvalues size = %d\n", curr_msg[0]);
+//            printf("\tindex of json %d\n", curr_msg[1]);
+//            for (int j = 2; j < msg_size; ++j) {
+//                printf("\tcount = %d\n", curr_msg[j]);
+//            }
             MPI_Send(&curr_msg, msg_size, MPI_INT, 0, 0, MPI_COMM_WORLD);
         }
     }
