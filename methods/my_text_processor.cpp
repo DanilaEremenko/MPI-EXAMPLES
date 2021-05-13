@@ -75,33 +75,49 @@ void count_pattern_from_to_wrapper(
 }
 
 //TODO maybe no please
-std::vector<int> get_smart_batch_bounds(
-        int curr_batch_from,
-        int curr_batch_to,
-        int batch_size,
+std::vector<std::pair<int, int>> get_smart_batch_bounds(
+        int thread_num,
         const std::string &curr_pattern,
         const std::string &full_text
 ) {
     /********************************
     ******* batch conflicts solver **
     ********************************/
-    int curr_batch_from_smart = fmax(0, (long) ((long) curr_batch_from - (long) (curr_pattern.length())));
-    int next_batch_from = curr_batch_from + batch_size;
-    int curr_batch_to_smart;
-    if (next_batch_from < full_text.length()) {
-        int next_batch_from_smart = fmax(0, (long) ((long) next_batch_from - (long) (curr_pattern.length())));
-        curr_batch_to_smart =
-                count_pattern_from_to(full_text, curr_pattern, next_batch_from_smart, curr_batch_to)
-                ?
-                next_batch_from_smart : curr_batch_to;
-        curr_batch_to_smart = fmax(curr_batch_to_smart, curr_pattern.length());
+    // get batch size
+    int batch_size = std::ceil((float) full_text.size() / (float) thread_num);
+    if (batch_size == curr_pattern.length()) {
+        printf("To small text with size %lu for paralleling with thread num = %d\n", full_text.length(), thread_num);
+        exit(1);
+    }
+    std::vector<std::pair<int, int>> batch_bounds;
 
-    } else {
-        curr_batch_to_smart = curr_batch_to;
+    for (int i = 0; i < thread_num; ++i) {
+        int curr_from = batch_size * i;
+        int curr_to = fmin(batch_size * (i + 1), full_text.length());
+        batch_bounds.emplace_back(std::make_pair(curr_from, curr_to));
     }
 
-    std::vector<int> res;
-    return res;
+    std::vector<std::pair<int, int>> smart_batch_bounds = batch_bounds;
+    for (int i = 0; i < thread_num - 1; ++i) {
+        std::pair<int, int> curr_bounds = smart_batch_bounds[i];
+        std::pair<int, int> check_bounds = std::make_pair(
+                fmax(0, curr_bounds.second - curr_pattern.length() + 1),
+                fmin(full_text.length(), curr_bounds.second + curr_pattern.length() - 1)
+        );
+
+        int conflict = count_pattern_from_to(
+                full_text,
+                curr_pattern,
+                check_bounds.first,
+                check_bounds.second
+        );
+        if (conflict) {
+            smart_batch_bounds[i].second -= curr_pattern.length() - 1;
+            smart_batch_bounds[i + 1].first -= curr_pattern.length() - 1;
+        }
+    }
+
+    return smart_batch_bounds;
 }
 
 std::list<int> my_count_words_parallel_posix(
@@ -114,11 +130,9 @@ std::list<int> my_count_words_parallel_posix(
         int curr_value = 0;
         std::mutex mutex;
         std::list<std::thread> thread_list;
-        int batch_size = fmax(std::ceil((float) full_text.size() / (float) thread_num), curr_pattern.length());
 
-        for (int curr_batch_from = 0; curr_batch_from < full_text.size(); curr_batch_from += batch_size) {
-            int curr_batch_from_smart = curr_batch_from;
-            int curr_batch_to_smart = fmin(curr_batch_from + batch_size + curr_pattern.length(), full_text.length());
+        std::vector<std::pair<int, int>> batches_bounds = get_smart_batch_bounds(thread_num, curr_pattern, full_text);
+        for (std::pair<int, int> curr_bounds:batches_bounds) {
 
             thread_list.push_front(
                     std::thread(
@@ -129,8 +143,8 @@ std::list<int> my_count_words_parallel_posix(
                             &mutex,
                             full_text,
                             curr_pattern,
-                            curr_batch_from_smart,
-                            curr_batch_to_smart
+                            curr_bounds.first,
+                            curr_bounds.second
                     )
             );
 
