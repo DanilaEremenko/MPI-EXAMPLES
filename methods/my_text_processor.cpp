@@ -202,41 +202,38 @@ json test_func(
     std::cout << "---------------TEST " + name + " --------------------------------------------\n";
     json res_json = config_json;
     int i = 0;
-    for (json curr_json:config_json["input_list"]) {
-        std::string input_name = curr_json["name"];
+    std::string input_name = config_json["name"];
 
-        verbose_print("-------- FILE = " + input_name + "-----------------\n", verbose);
-        std::string full_text = read_file(input_name);
-        std::list<std::string> word_list = curr_json["word_list"];
-        std::list<int> count_test_list = curr_json["test_list"];
+    verbose_print("-------- FILE = " + input_name + "-----------------\n", verbose);
+    std::string full_text = read_file(input_name);
+    std::list<std::string> word_list = config_json["word_list"];
+    std::list<int> count_test_list = config_json["test_list"];
 
-        // ------------------------ function call -----------------------------
-        auto begin_time = std::chrono::high_resolution_clock::now();
-        std::list<int> count_list = tested_func(
-                full_text,
-                word_list,
-                thread_num
-        );
-        auto end_time = std::chrono::high_resolution_clock::now();
-        res_json["input_list"][i]["time"] = (end_time - begin_time).count() * 1e-9;
-        i++;
+    // ------------------------ function call -----------------------------
+    auto begin_time = std::chrono::high_resolution_clock::now();
+    std::list<int> count_list = tested_func(
+            full_text,
+            word_list,
+            thread_num
+    );
+    auto end_time = std::chrono::high_resolution_clock::now();
+    res_json["input_list"][i]["time"] = (end_time - begin_time).count() * 1e-9;
+    i++;
 
-        // ------------------------ results assertion -----------------------------
-        auto word_it = word_list.begin();
-        auto cnt_it = count_list.begin();
-        auto cnt_test_it = count_test_list.begin();
-        for (; word_it != word_list.end() && cnt_it != count_list.end(); ++word_it, ++cnt_it, ++cnt_test_it) {
-            if (*cnt_it != *cnt_test_it) {
-                std::cout << "TEST FAILED FOR " << curr_json["name"] << " : '" << *word_it << "' = " << *cnt_it << "\n";
-                exit(1);
-            }
-            verbose_print(
-                    "\'" + (*word_it) + "\' : " + std::to_string(*cnt_it) + "(" + std::to_string(*cnt_test_it) + ")" +
-                    '\n', verbose);
+    // ------------------------ results assertion -----------------------------
+    auto word_it = word_list.begin();
+    auto cnt_it = count_list.begin();
+    auto cnt_test_it = count_test_list.begin();
+    for (; word_it != word_list.end() && cnt_it != count_list.end(); ++word_it, ++cnt_it, ++cnt_test_it) {
+        if (*cnt_it != *cnt_test_it) {
+            std::cout << "TEST FAILED FOR " << config_json["name"] << " : '" << *word_it << "' = " << *cnt_it << "\n";
+            exit(1);
         }
-        verbose_print("ASSERTION PASSED\n", verbose);
-
+        verbose_print(
+                "\'" + (*word_it) + "\' : " + std::to_string(*cnt_it) + "(" + std::to_string(*cnt_test_it) + ")" +
+                '\n', verbose);
     }
+    verbose_print("ASSERTION PASSED\n", verbose);
 
     return res_json;
 }
