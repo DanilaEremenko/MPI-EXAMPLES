@@ -7,6 +7,7 @@
 #include <future>
 #include <cassert>
 #include <fstream>
+#include <cstdarg>
 
 /***********************************************************************************************************************
 ------------------------------------------------------- COMMON PART ----------------------------------------------------
@@ -177,9 +178,15 @@ std::string read_file(const std::string &input_name) {
     return res_string;
 }
 
-void verbose_print(const std::string &msg, bool verbose) {
-    if (verbose)
-        std::cout << msg;
+void verbose_print(const char *__restrict _format, ...) {
+    if (true) {
+        char buffer[256];
+        va_list args;
+        va_start(args, _format);
+        vsnprintf(buffer, 255, _format, args);
+        printf("%s", buffer);
+        va_end(args);
+    }
 }
 
 /***********************************************************************************************************************
@@ -199,12 +206,11 @@ json test_func(
         bool verbose,
         int thread_num
 ) {
-    std::cout << "---------------TEST " + name + " --------------------------------------------\n";
+    verbose_print("---------------TEST %s --------------------------------------------\n", name.c_str());
     json res_json = config_json;
-    int i = 0;
     std::string input_name = config_json["name"];
 
-    verbose_print("-------- FILE = " + input_name + "-----------------\n", verbose);
+    verbose_print("-------- FILE = %s -----------------\n", input_name.c_str());
     std::string full_text = read_file(input_name);
     std::list<std::string> word_list = config_json["word_list"];
     std::list<int> count_test_list = config_json["test_list"];
@@ -217,8 +223,6 @@ json test_func(
             thread_num
     );
     auto end_time = std::chrono::high_resolution_clock::now();
-    res_json["input_list"][i]["time"] = (end_time - begin_time).count() * 1e-9;
-    i++;
 
     // ------------------------ results assertion -----------------------------
     auto word_it = word_list.begin();
@@ -229,9 +233,6 @@ json test_func(
             std::cout << "TEST FAILED FOR " << config_json["name"] << " : '" << *word_it << "' = " << *cnt_it << "\n";
             exit(1);
         }
-        verbose_print(
-                "\'" + (*word_it) + "\' : " + std::to_string(*cnt_it) + "(" + std::to_string(*cnt_test_it) + ")" +
-                '\n', verbose);
     }
     verbose_print("ASSERTION PASSED\n", verbose);
 
