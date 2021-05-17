@@ -57,13 +57,9 @@ int main() {
 
             for (int j = 1; j < 1 + count_list_size; ++j) {
                 verbose_print("\tcount = %d\n", curr_msg[j]);
+                res_json["test_list"][j - 1] = int(res_json["test_list"][j - 1]) + curr_msg[j];
             }
 
-
-            for (int i = 1; i < 1 + count_list_size; ++i) {
-                res_json["test_list"][i - 1] = int(res_json["test_list"][i - 1]) + curr_msg[i];
-
-            }
             received_num++;
         }
 
@@ -91,23 +87,24 @@ int main() {
         std::list<std::string> word_list = config_json["word_list"];
         std::list<int> count_test_list = config_json["test_list"];
         int curr_task_info[2];
-        MPI_Recv(&curr_task_info, 2, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, nullptr);
-        int my_from = curr_task_info[0];
-        int my_to = curr_task_info[1];
 
         int msg_size = word_list.size() + 1;//first element - size, second elements - index of json
         int curr_msg[msg_size];
         curr_msg[0] = word_list.size();
         int i = 1;
         for (const std::string &curr_pattern :word_list) {
-            verbose_print("Rank = %d start calculating '%s' (%d - %d)\n()", rank, curr_pattern.c_str(), my_from,
-                          my_to);
+            MPI_Recv(&curr_task_info, 2, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, nullptr);
+            int curr_from = curr_task_info[0];
+            int curr_to = curr_task_info[1];
+
+            verbose_print("Rank = %d start calculating '%s' (%d - %d)\n()", rank, curr_pattern.c_str(), curr_from,
+                          curr_to);
             int curr_value = count_pattern_from_to(
                     //args
                     full_text,
                     curr_pattern,
-                    my_from,
-                    my_to
+                    curr_from,
+                    curr_to
             );
 
             verbose_print("Rank = %d, value = %d\n", rank, curr_value);
@@ -118,7 +115,6 @@ int main() {
         }
         verbose_print("Rank = %d sending message\n", rank);
         verbose_print("\tvalues size = %d\n", curr_msg[0]);
-        verbose_print("\tindex of json %d\n", curr_msg[1]);
         for (int j = 1; j < msg_size; ++j) {
             verbose_print("\tcount = %d\n", curr_msg[j]);
         }
