@@ -187,6 +187,24 @@ void verbose_print(const char *__restrict _format, ...) {
 
 using json = nlohmann::json;
 
+void assert_count_results(const std::string &test_name,
+                          std::list<std::string> word_list,
+                          std::list<int> count_list,
+                          std::list<int> count_test_list,
+                          bool verbose
+) {
+    // ------------------------ results assertion -----------------------------
+    auto word_it = word_list.begin();
+    auto cnt_it = count_list.begin();
+    auto cnt_test_it = count_test_list.begin();
+    for (; word_it != word_list.end() && cnt_it != count_list.end(); ++word_it, ++cnt_it, ++cnt_test_it) {
+        if (*cnt_it != *cnt_test_it) {
+            std::cout << "TEST FAILED FOR " << test_name << " : '" << *word_it << "' = " << *cnt_it << "\n";
+            exit(1);
+        }
+    }
+    verbose_print("ASSERTION PASSED\n", verbose);
+}
 
 json test_func(
         const std::string &name,
@@ -219,17 +237,14 @@ json test_func(
     }
     auto end_time = std::chrono::high_resolution_clock::now();
 
-    // ------------------------ results assertion -----------------------------
-    auto word_it = word_list.begin();
-    auto cnt_it = count_list.begin();
-    auto cnt_test_it = count_test_list.begin();
-    for (; word_it != word_list.end() && cnt_it != count_list.end(); ++word_it, ++cnt_it, ++cnt_test_it) {
-        if (*cnt_it != *cnt_test_it) {
-            std::cout << "TEST FAILED FOR " << config_json["name"] << " : '" << *word_it << "' = " << *cnt_it << "\n";
-            exit(1);
-        }
-    }
-    verbose_print("ASSERTION PASSED\n", verbose);
-
+    assert_count_results(
+            config_json["name"],
+            word_list,
+            count_list,
+            count_test_list,
+            verbose
+    );
     return res_json;
 }
+
+

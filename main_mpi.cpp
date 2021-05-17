@@ -66,8 +66,22 @@ int main() {
             }
             received_num++;
         }
+
+        /***********************************************************************************************************************
+        ------------------------------------------------------- RES ASSERTION --------------------------------------------------
+        ***********************************************************************************************************************/
+        std::list<std::string> word_list = config_json["word_list"];
+        std::list<int> count_list = res_json["test_list"];
+        std::list<int> count_test_list = config_json["test_list"];
+
+        assert_count_results(
+                config_json["name"],
+                word_list,
+                count_list,
+                count_test_list,
+                true
+        );
         std::ofstream res_file("res/res_mpi.json");
-        auto end_time = std::chrono::high_resolution_clock::now();
         res_file << res_json;
 
 
